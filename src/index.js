@@ -22,7 +22,7 @@ function showDateTime() {
 async function fetchWeather(location) {
   try {
     const response = await fetch(
-      `http://api.weatherapi.com/v1/forecast.json?key=de6d61d5a3d04af183d160101230709&days=7&q=${location}`,
+      `https://api.weatherapi.com/v1/forecast.json?key=de6d61d5a3d04af183d160101230709&days=7&q=${location}`,
       {
         mode: 'cors',
       },
