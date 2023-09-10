@@ -1,10 +1,17 @@
 import { format } from 'date-fns';
 
 let hourlyData;
+let currentData;
+let weeklyData;
+let count = 1;
+const left = document.querySelector('#left-button');
+const right = document.querySelector('#right-button');
+const input = document.querySelector('#location-input');
+const search = document.querySelector('#search');
 
 function showDateTime() {
   const date = document.querySelector('#date');
-  date.textContent = format(new Date(), 'dd.MM.yyyy');
+  date.textContent = format(new Date(), 'yyyy.MM.dd');
   const time = document.querySelector('#time');
   time.innerText = `${new Date().toLocaleTimeString('en-US', {
     timeStyle: 'short',
@@ -91,8 +98,7 @@ function displayWeekForecast(data) {
   const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const d = new Date();
   let initial = d.getDay() + 1;
-  days[0].textContent = 'Today';
-  for (let i = 1; i < days.length; i += 1) {
+  for (let i = 0; i < days.length; i += 1) {
     if (initial > 6) {
       initial = 0;
     }
@@ -107,7 +113,7 @@ function displayWeekForecast(data) {
   }
 }
 
-function displayHourlyForecast(data, count) {
+function displayHourlyForecast(data) {
   let start;
   if (count === 1) {
     start = 0;
@@ -158,49 +164,103 @@ function displayHourlyForecast(data, count) {
 }
 
 fetchWeather('mumbai').then((data) => {
-  console.log(data);
-  console.log(filterCurrentWeather(data));
-  console.log(filterForecastWeather(data));
-  console.log(filterHourlyForecastWeather(data.forecast.forecastday[0].hour));
   hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
   displayHourlyForecast(hourlyData, 1);
-  displayCurrentWeather(filterCurrentWeather(data));
-  displayWeekForecast(filterForecastWeather(data));
+  currentData = filterCurrentWeather(data);
+  displayCurrentWeather(currentData);
+  weeklyData = filterForecastWeather(data);
+  displayWeekForecast(weeklyData);
+  console.log({
+    data,
+    currentData,
+    hourlyData,
+    weeklyData,
+  });
 });
-
-const left = document.querySelector('#left-button');
-const right = document.querySelector('#right-button');
-let count = 1;
 
 left.addEventListener('click', () => {
   if (count === 1) {
     count = 4;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else if (count === 2) {
     count -= 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else if (count === 3) {
     count -= 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else {
     count -= 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   }
 });
 
 right.addEventListener('click', () => {
   if (count === 4) {
     count = 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else if (count === 3) {
     count += 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else if (count === 2) {
     count += 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
   } else {
     count += 1;
-    displayHourlyForecast(hourlyData, count);
+    displayHourlyForecast(hourlyData);
+  }
+});
+
+search.addEventListener('click', () => {
+  document.querySelector('.error-msg').classList.remove('visible');
+  fetchWeather(input.value)
+    .then((data) => {
+      hourlyData = filterHourlyForecastWeather(
+        data.forecast.forecastday[0].hour,
+      );
+      displayHourlyForecast(hourlyData, 1);
+      currentData = filterCurrentWeather(data);
+      displayCurrentWeather(currentData);
+      weeklyData = filterForecastWeather(data);
+      displayWeekForecast(weeklyData);
+      console.log({
+        data,
+        currentData,
+        hourlyData,
+        weeklyData,
+      });
+      input.value = '';
+    })
+    .catch(() => {
+      document.querySelector('.error-msg').classList.add('visible');
+      input.value = '';
+    });
+});
+
+document.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.querySelector('.error-msg').classList.remove('visible');
+    fetchWeather(input.value)
+      .then((data) => {
+        hourlyData = filterHourlyForecastWeather(
+          data.forecast.forecastday[0].hour,
+        );
+        displayHourlyForecast(hourlyData, 1);
+        currentData = filterCurrentWeather(data);
+        displayCurrentWeather(currentData);
+        weeklyData = filterForecastWeather(data);
+        displayWeekForecast(weeklyData);
+        console.log({
+          data,
+          currentData,
+          hourlyData,
+          weeklyData,
+        });
+        input.value = '';
+      })
+      .catch(() => {
+        document.querySelector('.error-msg').classList.add('visible');
+        input.value = '';
+      });
   }
 });
 
