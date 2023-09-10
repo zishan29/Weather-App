@@ -1,5 +1,7 @@
 import { format } from 'date-fns';
 
+let hourlyData;
+
 function showDateTime() {
   const date = document.querySelector('#date');
   date.textContent = format(new Date(), 'dd.MM.yyyy');
@@ -36,7 +38,6 @@ function filterCurrentWeather(data) {
   object.wind_mph = data.current.gust_mph;
   object.humidity = data.current.humidity;
   object.location = data.location.name;
-  object.icon = data.current.condition.icon;
   return object;
 }
 
@@ -44,12 +45,24 @@ function filterForecastWeather(data) {
   const object = [];
   for (let i = 0; i < 7; i += 1) {
     const day = {};
-    day.condition = data.forecast.forecastday[i].day.condition.text;
+    day.condition = data.forecast.forecastday[i].day.condition.icon;
     day.temperature_c = data.forecast.forecastday[i].day.avgtemp_c;
     day.temperature_f = data.forecast.forecastday[i].day.avgtemp_f;
     object.push(day);
   }
   return object;
+}
+
+function filterHourlyForecastWeather(data) {
+  const arr = [];
+  for (let i = 0; i < data.length; i += 1) {
+    const obj = {};
+    obj.temperature_c = data[i].temp_c;
+    obj.temperature_f = data[i].temp_f;
+    obj.condition = data[i].condition.icon;
+    arr.push(obj);
+  }
+  return arr;
 }
 
 function displayCurrentWeather(data) {
@@ -63,8 +76,7 @@ function displayCurrentWeather(data) {
   document.querySelector(
     '#right-temperature',
   ).textContent = `${data.temperature_c}\u00B0`;
-  document.querySelector('#condition').textContent = data.condition;
-  document.querySelector('#condition-icon').src = data.icon;
+  document.querySelector('#condition-span').textContent = data.condition;
   document.querySelector('#right-condition').textContent = data.condition;
   document.querySelector(
     '#feel',
@@ -73,31 +85,123 @@ function displayCurrentWeather(data) {
 }
 
 function displayWeekForecast(data) {
+  const days = document.querySelectorAll('.day');
+  const temperatures = document.querySelectorAll('.temp');
+  const conditions = document.querySelectorAll('.condition');
   const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const d = new Date();
-  let day = weekday[d.getDay()];
-  let i = 0;
-  let days = document.querySelectorAll('.day');
-  let temperatures = document.querySelectorAll('.temp');
-  days.forEach((day) => {
-    if (i === 0) {
-      day.textContent = 'Today';
-      i++;
-    } else {
-      day.textContent = `${weekday[d.getDay() + i]}`;
-      i++;
+  let initial = d.getDay() + 1;
+  days[0].textContent = 'Today';
+  for (let i = 1; i < days.length; i += 1) {
+    if (initial > 6) {
+      initial = 0;
     }
-  });
-  i = 0;
-  console.log(temperatures);
+    days[i].textContent = weekday[initial];
+    initial += 1;
+  }
+  for (let i = 0; i < temperatures.length; i += 1) {
+    temperatures[i].textContent = `${data[i].temperature_c}\u00B0`;
+  }
+  for (let i = 0; i < conditions.length; i += 1) {
+    conditions[i].src = data[i].condition;
+  }
+}
+
+function displayHourlyForecast(data, count) {
+  let start;
+  if (count === 1) {
+    start = 0;
+  } else if (count === 2) {
+    start = 6;
+  } else if (count === 3) {
+    start = 12;
+  } else {
+    start = 18;
+  }
+  const temperatures = document.querySelectorAll('.hour-temp');
+  const conditions = document.querySelectorAll('.hour-condition');
+  const time = document.querySelectorAll('.time');
+  if (start === 0) {
+    let a = 12;
+    time[0].textContent = `${a} AM`;
+    a = 1;
+    for (let i = 1; i < time.length; i += 1) {
+      time[i].textContent = `${a} AM`;
+      a += 1;
+    }
+  } else if (start === 6) {
+    let a = 6;
+    for (let i = 0; i < time.length; i += 1) {
+      time[i].textContent = `${a} AM`;
+      a += 1;
+    }
+  } else if (start === 12) {
+    let a = 12;
+    time[0].textContent = `${a} PM`;
+    a = 1;
+    for (let i = 1; i < time.length; i += 1) {
+      time[i].textContent = `${a} PM`;
+      a += 1;
+    }
+  } else {
+    let a = 6;
+    for (let i = 0; i < time.length; i += 1) {
+      time[i].textContent = `${a} PM`;
+      a += 1;
+    }
+  }
+  for (let i = 0; i < temperatures.length; i += 1) {
+    temperatures[i].textContent = data[start].temperature_c;
+    conditions[i].src = data[start].condition;
+    start += 1;
+  }
 }
 
 fetchWeather('mumbai').then((data) => {
   console.log(data);
   console.log(filterCurrentWeather(data));
   console.log(filterForecastWeather(data));
+  console.log(filterHourlyForecastWeather(data.forecast.forecastday[0].hour));
+  hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
+  displayHourlyForecast(hourlyData, 1);
   displayCurrentWeather(filterCurrentWeather(data));
   displayWeekForecast(filterForecastWeather(data));
+});
+
+const left = document.querySelector('#left-button');
+const right = document.querySelector('#right-button');
+let count = 1;
+
+left.addEventListener('click', () => {
+  if (count === 1) {
+    count = 4;
+    displayHourlyForecast(hourlyData, count);
+  } else if (count === 2) {
+    count -= 1;
+    displayHourlyForecast(hourlyData, count);
+  } else if (count === 3) {
+    count -= 1;
+    displayHourlyForecast(hourlyData, count);
+  } else {
+    count -= 1;
+    displayHourlyForecast(hourlyData, count);
+  }
+});
+
+right.addEventListener('click', () => {
+  if (count === 4) {
+    count = 1;
+    displayHourlyForecast(hourlyData, count);
+  } else if (count === 3) {
+    count += 1;
+    displayHourlyForecast(hourlyData, count);
+  } else if (count === 2) {
+    count += 1;
+    displayHourlyForecast(hourlyData, count);
+  } else {
+    count += 1;
+    displayHourlyForecast(hourlyData, count);
+  }
 });
 
 showDateTime();
