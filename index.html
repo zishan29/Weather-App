@@ -14,10 +14,19 @@
   </head>
   <body>
     <div id="main-container">
+      <div>
+        <input
+          type="text"
+          id="location-input"
+          placeholder="Search Location..."
+        />
+        <img src="./icons/magnify.svg" id="search" />
+      </div>
+      <div class="error-msg">Location not found.</div>
       <div id="container">
         <div id="left">
-          <div id="city">Mumbai</div>
-          <div id="date">09.09.2023</div>
+          <div id="city">-</div>
+          <div id="date">-</div>
           <div id="weather">
             <div id="temperature">00&deg</div>
             <div id="content">
@@ -61,11 +70,6 @@
             <div id="box6" class="box">
               <div id="day6" class="day">Today</div>
               <div id="temp6" class="temp">00&deg</div>
-              <img src="./icons/weather-cloudy.svg" alt="" class="condition" />
-            </div>
-            <div id="box7" class="box">
-              <div id="day7" class="day">Today</div>
-              <div id="temp7" class="temp">00&deg</div>
               <img src="./icons/weather-cloudy.svg" alt="" class="condition" />
             </div>
           </div>

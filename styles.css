@@ -5,6 +5,7 @@
 
 :root {
   font-family: 'Roboto', sans-serif;
+  cursor: default;
 }
 
 img {
@@ -21,8 +22,10 @@ body {
 #main-container {
   display: grid;
   justify-content: center;
-  align-items: center;
+  align-content: center;
   height: 100vh;
+  grid-template-rows: max-content max-content;
+  gap: 20px;
 }
 
 #container {
@@ -129,13 +132,9 @@ body {
   height: 90px;
   justify-items: center;
   align-items: center;
-  border: 1px solid transparent;
   grid-auto-rows: max-content;
   gap: 10px;
-}
-
-.box:hover {
-  border: 1px solid #e2e2e2;
+  cursor: pointer;
 }
 
 .temp,
@@ -254,4 +253,51 @@ body {
   border: 1px solid #e2e2e2;
   grid-auto-rows: max-content;
   gap: 10px;
+}
+
+#main-container > div:nth-child(1) {
+  display: flex;
+  align-items: center;
+  justify-self: flex-start;
+  gap: 5px;
+  border-bottom: 1px solid #a9a9a9;
+  padding-right: 5px;
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+}
+
+#location-input {
+  height: 30px;
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  padding-left: 5px;
+}
+
+#location-input:focus {
+  outline: none;
+}
+
+#search {
+  cursor: pointer;
+  height: 24px;
+  width: auto;
+}
+
+#location-input::placeholder {
+  color: #a9a9a9;
+}
+
+.error-msg {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  position: relative;
+  left: 265px;
+  align-self: center;
+  color: #696969;
+  visibility: hidden;
+}
+
+.visible {
+  visibility: visible;
 }
