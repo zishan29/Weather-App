@@ -47,8 +47,8 @@ function filterCurrentWeather(data) {
   object.temperature_f = data.current.temp_f;
   object.feelslike_c = data.current.feelslike_c;
   object.feelslike_f = data.current.feelslike_f;
-  object.wind_kph = data.current.gust_kph;
-  object.wind_mph = data.current.gust_mph;
+  object.wind_kph = data.current.wind_kph;
+  object.wind_mph = data.current.wind_mph;
   object.humidity = data.current.humidity;
   object.location = data.location.name;
   return object;
@@ -97,6 +97,25 @@ function displayCurrentWeather(data) {
   document.querySelector('#city').textContent = data.location;
 }
 
+function displayFahrenheitCurrentWeather(data) {
+  document.querySelector('.wind').textContent = `${data.wind_kph} kph`;
+  document.querySelector('.humidity').textContent = `${data.humidity} %`;
+  document.querySelector('.right-wind').textContent = `${data.wind_kph} kph`;
+  document.querySelector('.right-humidity').textContent = `${data.humidity} %`;
+  document.querySelector(
+    '#temperature',
+  ).textContent = `${data.temperature_f}\u00B0`;
+  document.querySelector(
+    '#right-temperature',
+  ).textContent = `${data.temperature_f}\u00B0`;
+  document.querySelector('#condition-span').textContent = data.condition;
+  document.querySelector('#right-condition').textContent = data.condition;
+  document.querySelector(
+    '#feel',
+  ).textContent = `feels like ${data.feelslike_f}\u00B0`;
+  document.querySelector('#city').textContent = data.location;
+}
+
 function displayWeekForecast(data) {
   const days = document.querySelectorAll('.day');
   const temperatures = document.querySelectorAll('.temp');
@@ -113,6 +132,28 @@ function displayWeekForecast(data) {
   }
   for (let i = 0; i < temperatures.length; i += 1) {
     temperatures[i].textContent = `${data[i].temperature_c}\u00B0`;
+  }
+  for (let i = 0; i < conditions.length; i += 1) {
+    conditions[i].src = data[i].condition;
+  }
+}
+
+function displayFahrenheitWeekForecast(data) {
+  const days = document.querySelectorAll('.day');
+  const temperatures = document.querySelectorAll('.temp');
+  const conditions = document.querySelectorAll('.condition');
+  const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const d = new Date();
+  let initial = d.getDay() + 1;
+  for (let i = 0; i < days.length; i += 1) {
+    if (initial > 6) {
+      initial = 0;
+    }
+    days[i].textContent = weekday[initial];
+    initial += 1;
+  }
+  for (let i = 0; i < temperatures.length; i += 1) {
+    temperatures[i].textContent = `${data[i].temperature_f}\u00B0`;
   }
   for (let i = 0; i < conditions.length; i += 1) {
     conditions[i].src = data[i].condition;
@@ -163,7 +204,57 @@ function displayHourlyForecast(data) {
     }
   }
   for (let i = 0; i < temperatures.length; i += 1) {
-    temperatures[i].textContent = data[start].temperature_c;
+    temperatures[i].textContent = `${data[start].temperature_c}\u00B0`;
+    conditions[i].src = data[start].condition;
+    start += 1;
+  }
+}
+
+function displayFahrenheitHourlyForecast(data) {
+  let start;
+  if (count === 1) {
+    start = 0;
+  } else if (count === 2) {
+    start = 6;
+  } else if (count === 3) {
+    start = 12;
+  } else {
+    start = 18;
+  }
+  const temperatures = document.querySelectorAll('.hour-temp');
+  const conditions = document.querySelectorAll('.hour-condition');
+  const time = document.querySelectorAll('.time');
+  if (start === 0) {
+    let a = 12;
+    time[0].textContent = `${a} AM`;
+    a = 1;
+    for (let i = 1; i < time.length; i += 1) {
+      time[i].textContent = `${a} AM`;
+      a += 1;
+    }
+  } else if (start === 6) {
+    let a = 6;
+    for (let i = 0; i < time.length; i += 1) {
+      time[i].textContent = `${a} AM`;
+      a += 1;
+    }
+  } else if (start === 12) {
+    let a = 12;
+    time[0].textContent = `${a} PM`;
+    a = 1;
+    for (let i = 1; i < time.length; i += 1) {
+      time[i].textContent = `${a} PM`;
+      a += 1;
+    }
+  } else {
+    let a = 6;
+    for (let i = 0; i < time.length; i += 1) {
+      time[i].textContent = `${a} PM`;
+      a += 1;
+    }
+  }
+  for (let i = 0; i < temperatures.length; i += 1) {
+    temperatures[i].textContent = `${data[start].temperature_f}\u00B0`;
     conditions[i].src = data[start].condition;
     start += 1;
   }
@@ -171,43 +262,82 @@ function displayHourlyForecast(data) {
 
 fetchWeather('mumbai').then((data) => {
   hideLoading();
-  hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
-  displayHourlyForecast(hourlyData, 1);
   currentData = filterCurrentWeather(data);
-  displayCurrentWeather(currentData);
   weeklyData = filterForecastWeather(data);
-  displayWeekForecast(weeklyData);
+  hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
+  if (document.querySelector('input[type=checkbox]').checked) {
+    displayHourlyForecast(hourlyData, 1);
+    displayCurrentWeather(currentData);
+    displayWeekForecast(weeklyData);
+  } else {
+    displayFahrenheitHourlyForecast(hourlyData);
+    displayFahrenheitCurrentWeather(currentData);
+    displayFahrenheitWeekForecast(weeklyData);
+  }
+  input.value = '';
 });
 
 left.addEventListener('click', () => {
   if (count === 1) {
     count = 4;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else if (count === 2) {
     count -= 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else if (count === 3) {
     count -= 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else {
     count -= 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   }
 });
 
 right.addEventListener('click', () => {
   if (count === 4) {
     count = 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else if (count === 3) {
     count += 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else if (count === 2) {
     count += 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   } else {
     count += 1;
-    displayHourlyForecast(hourlyData);
+    if (document.querySelector('input[type=checkbox]').checked) {
+      displayHourlyForecast(hourlyData);
+    } else {
+      displayFahrenheitHourlyForecast(hourlyData);
+    }
   }
 });
 
@@ -216,14 +346,20 @@ search.addEventListener('click', () => {
   fetchWeather(input.value)
     .then((data) => {
       hideLoading();
+      currentData = filterCurrentWeather(data);
+      weeklyData = filterForecastWeather(data);
       hourlyData = filterHourlyForecastWeather(
         data.forecast.forecastday[0].hour,
       );
-      displayHourlyForecast(hourlyData, 1);
-      currentData = filterCurrentWeather(data);
-      displayCurrentWeather(currentData);
-      weeklyData = filterForecastWeather(data);
-      displayWeekForecast(weeklyData);
+      if (document.querySelector('input[type=checkbox]').checked) {
+        displayHourlyForecast(hourlyData, 1);
+        displayCurrentWeather(currentData);
+        displayWeekForecast(weeklyData);
+      } else {
+        displayFahrenheitHourlyForecast(hourlyData);
+        displayFahrenheitCurrentWeather(currentData);
+        displayFahrenheitWeekForecast(weeklyData);
+      }
       input.value = '';
     })
     .catch(() => {
@@ -238,14 +374,20 @@ document.addEventListener('keypress', (e) => {
     fetchWeather(input.value)
       .then((data) => {
         hideLoading();
+        currentData = filterCurrentWeather(data);
+        weeklyData = filterForecastWeather(data);
         hourlyData = filterHourlyForecastWeather(
           data.forecast.forecastday[0].hour,
         );
-        displayHourlyForecast(hourlyData, 1);
-        currentData = filterCurrentWeather(data);
-        displayCurrentWeather(currentData);
-        weeklyData = filterForecastWeather(data);
-        displayWeekForecast(weeklyData);
+        if (document.querySelector('input[type=checkbox]').checked) {
+          displayHourlyForecast(hourlyData, 1);
+          displayCurrentWeather(currentData);
+          displayWeekForecast(weeklyData);
+        } else {
+          displayFahrenheitHourlyForecast(hourlyData);
+          displayFahrenheitCurrentWeather(currentData);
+          displayFahrenheitWeekForecast(weeklyData);
+        }
         input.value = '';
       })
       .catch(() => {
@@ -256,3 +398,16 @@ document.addEventListener('keypress', (e) => {
 });
 
 showDateTime();
+
+const status = document.querySelector('input[type=checkbox]');
+status.addEventListener('click', (e) => {
+  if (e.target.checked) {
+    displayHourlyForecast(hourlyData, 1);
+    displayCurrentWeather(currentData);
+    displayWeekForecast(weeklyData);
+  } else {
+    displayFahrenheitHourlyForecast(hourlyData, 1);
+    displayFahrenheitCurrentWeather(currentData);
+    displayFahrenheitWeekForecast(weeklyData);
+  }
+});
