@@ -264,6 +264,7 @@ body {
   padding-right: 5px;
   grid-row: 1 / 2;
   grid-column: 1 / 2;
+  position: relative;
 }
 
 #location-input {
@@ -300,4 +301,28 @@ body {
 
 .visible {
   visibility: visible;
+}
+
+#loading {
+  width: 2rem;
+  height: 2rem;
+  border: 5px solid #f3f3f3;
+  border-top: 6px solid #696969;
+  border-radius: 100%;
+  margin: auto;
+  visibility: hidden;
+  animation: spin 1s infinite linear;
+  position: absolute;
+  left: 270px;
+}
+#loading.display {
+  visibility: visible;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
