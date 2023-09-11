@@ -8,6 +8,7 @@ const left = document.querySelector('#left-button');
 const right = document.querySelector('#right-button');
 const input = document.querySelector('#location-input');
 const search = document.querySelector('#search');
+const loader = document.querySelector('#loading');
 
 function showDateTime() {
   const date = document.querySelector('#date');
@@ -19,19 +20,24 @@ function showDateTime() {
   setTimeout(showDateTime, 1000);
 }
 
+function displayLoading() {
+  loader.classList.add('display');
+}
+
+function hideLoading() {
+  loader.classList.remove('display');
+}
+
 async function fetchWeather(location) {
-  try {
-    const response = await fetch(
-      `https://api.weatherapi.com/v1/forecast.json?key=de6d61d5a3d04af183d160101230709&days=7&q=${location}`,
-      {
-        mode: 'cors',
-      },
-    );
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    return err;
-  }
+  displayLoading();
+  const response = await fetch(
+    `https://api.weatherapi.com/v1/forecast.json?key=de6d61d5a3d04af183d160101230709&days=7&q=${location}`,
+    {
+      mode: 'cors',
+    },
+  );
+  const data = await response.json();
+  return data;
 }
 
 function filterCurrentWeather(data) {
@@ -164,18 +170,13 @@ function displayHourlyForecast(data) {
 }
 
 fetchWeather('mumbai').then((data) => {
+  hideLoading();
   hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
   displayHourlyForecast(hourlyData, 1);
   currentData = filterCurrentWeather(data);
   displayCurrentWeather(currentData);
   weeklyData = filterForecastWeather(data);
   displayWeekForecast(weeklyData);
-  console.log({
-    data,
-    currentData,
-    hourlyData,
-    weeklyData,
-  });
 });
 
 left.addEventListener('click', () => {
@@ -214,6 +215,7 @@ search.addEventListener('click', () => {
   document.querySelector('.error-msg').classList.remove('visible');
   fetchWeather(input.value)
     .then((data) => {
+      hideLoading();
       hourlyData = filterHourlyForecastWeather(
         data.forecast.forecastday[0].hour,
       );
@@ -222,12 +224,6 @@ search.addEventListener('click', () => {
       displayCurrentWeather(currentData);
       weeklyData = filterForecastWeather(data);
       displayWeekForecast(weeklyData);
-      console.log({
-        data,
-        currentData,
-        hourlyData,
-        weeklyData,
-      });
       input.value = '';
     })
     .catch(() => {
@@ -241,6 +237,7 @@ document.addEventListener('keypress', (e) => {
     document.querySelector('.error-msg').classList.remove('visible');
     fetchWeather(input.value)
       .then((data) => {
+        hideLoading();
         hourlyData = filterHourlyForecastWeather(
           data.forecast.forecastday[0].hour,
         );
@@ -249,12 +246,6 @@ document.addEventListener('keypress', (e) => {
         displayCurrentWeather(currentData);
         weeklyData = filterForecastWeather(data);
         displayWeekForecast(weeklyData);
-        console.log({
-          data,
-          currentData,
-          hourlyData,
-          weeklyData,
-        });
         input.value = '';
       })
       .catch(() => {
