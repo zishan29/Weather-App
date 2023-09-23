@@ -56,7 +56,7 @@ function filterCurrentWeather(data) {
 
 function filterForecastWeather(data) {
   const object = [];
-  for (let i = 0; i < 7; i += 1) {
+  for (let i = 0; i < 3; i += 1) {
     const day = {};
     day.condition = data.forecast.forecastday[i].day.condition.icon;
     day.temperature_c = data.forecast.forecastday[i].day.avgtemp_c;
@@ -123,7 +123,8 @@ function displayWeekForecast(data) {
   const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const d = new Date();
   let initial = d.getDay() + 1;
-  for (let i = 0; i < days.length; i += 1) {
+  days[0].textContent = 'Today';
+  for (let i = 1; i < days.length; i += 1) {
     if (initial > 6) {
       initial = 0;
     }
@@ -145,7 +146,8 @@ function displayFahrenheitWeekForecast(data) {
   const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const d = new Date();
   let initial = d.getDay() + 1;
-  for (let i = 0; i < days.length; i += 1) {
+  days[0].textContent = 'Today';
+  for (let i = 1; i < days.length; i += 1) {
     if (initial > 6) {
       initial = 0;
     }
@@ -263,6 +265,7 @@ function displayFahrenheitHourlyForecast(data) {
 fetchWeather('mumbai').then((data) => {
   hideLoading();
   currentData = filterCurrentWeather(data);
+  console.log(data);
   weeklyData = filterForecastWeather(data);
   hourlyData = filterHourlyForecastWeather(data.forecast.forecastday[0].hour);
   if (document.querySelector('input[type=checkbox]').checked) {
